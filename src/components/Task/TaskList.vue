@@ -1,11 +1,13 @@
 <template>
-  <v-container fluid class="mx-0 my-0 px-0 py-0">
-    <v-row>
-      <v-col cols="12" md="12"></v-col>
+  <v-container fluid class="pa-0" style="border-right: 1px solid #26b2a2">
+    <v-row class="ma-0">
+      <v-col cols="12" md="12">
+        Task
+      </v-col>
     </v-row>
-    <v-row>
-      <v-list>
-        <v-list-item>
+    <v-row class="ma-0">
+      <v-list class="gantt-task-list">
+        <v-list-item class="gantt-task-item">
           <v-list-item-title>Task 01</v-list-item-title>
         </v-list-item>
       </v-list>
@@ -20,5 +22,11 @@ export default {
 </script>
 
 <style>
-
+.gantt-task-item {
+  min-height: 30px;
+  height: 30px;
+}
+.gantt-task-list {
+  padding: 0;
+}
 </style>

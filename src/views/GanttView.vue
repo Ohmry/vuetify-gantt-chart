@@ -1,10 +1,10 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="3" class="pa-0">
         <TaskList />
       </v-col>
-      <v-col cols="12" md="9">
+      <v-col cols="12" md="9" class="pa-0">
         <GanttChart />
       </v-col>
     </v-row>
