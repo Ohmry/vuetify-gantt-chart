@@ -11,11 +11,13 @@
       <text class="gantt-calendar__day-text" v-for="(day, index) in this.days" :key="'day_text_' + index" :x="(index * 30) + (day.label < 10 ? 11.255 : 7.51)" y="50" :fill="day.color" font-size="14">{{ day.label }}</text>
     </svg>
     <svg :width="this.calendar.width" height="30">
+      <rect v-for="(day, index) in this.days" :key="'day_rect_1_' + index" :x="(index) * 30" y="0" width="30" height="30" :fill="day.bgColor" />
       <line x1="0" :x2="this.calendar.width" :y1="30" :y2="30" stroke-width="2" stroke="#26B2A2" />
       <line v-for="(day, index) in this.days" :key="'day_line_1_' + index" :x1="(index + 1) * 30" :x2="(index + 1) * 30" y1="0" y2="30" stroke-width="1" stroke="#26B2A2" />
       <text class="gantt-calendar__day-text" v-for="(day, index) in this.days" :key="'day_text_' + index" :x="(index * 30) + (day.label < 10 ? 11.255 : 7.51)" y="50" :fill="day.color" font-size="14">{{ day.label }}</text>
     </svg>
     <svg :width="this.calendar.width" height="30">
+      <rect v-for="(day, index) in this.days" :key="'day_rect_2_' + index" :x="(index) * 30" y="0" width="30" height="30" :fill="day.bgColor" />
       <line x1="0" :x2="this.calendar.width" :y1="30" :y2="30" stroke-width="2" stroke="#26B2A2" />
       <line v-for="(day, index) in this.days" :key="'day_line_2_' + index" :x1="(index + 1) * 30" :x2="(index + 1) * 30" y1="0" y2="30" stroke-width="1" stroke="#26B2A2" />
       <text class="gantt-calendar__day-text" v-for="(day, index) in this.days" :key="'day_text_' + index" :x="(index * 30) + (day.label < 10 ? 11.255 : 7.51)" y="50" :fill="day.color" font-size="14">{{ day.label }}</text>
@@ -63,7 +65,8 @@ export default {
           return {
             label: k + 1,
             value: cursor.getFullYear() + '' + (cursor.getMonth() + 1 < 10 ? '0' + (cursor.getMonth() + 1) : cursor.getMonth() + 1) + '' + ((k + 1) < 10 ? '0' + (k + 1) : (k + 1)),
-            color: day.getDay() == 0 ? 'red' : day.getDay() == 6 ? 'blue' : 'black'
+            color: day.getDay() == 0 ? 'red' : day.getDay() == 6 ? 'blue' : 'black',
+            bgColor: day.getDay() == 0 || day.getDay() == 6 ? 'lightgrey' : 'transparent'
           }
         }))
         this.calendar.width += monthWidth
