@@ -1,17 +1,10 @@
 <template>
   <v-app>
-    <v-navigation-drawer app>
-      <v-list>
-        <router-link to="/">
-          <v-list-item class="px-8">
-            <v-list-item-icon>
-              <v-icon>event_note</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Gantt Chart</v-list-item-title>
-          </v-list-item>
-        </router-link>
-      </v-list>
-    </v-navigation-drawer>
+    <v-toolbar class="app-bar" dense flat max-height="48" color="#5B7347">
+      <router-link to="/">
+        <v-toolbar-title class="app-bar__title text-h5">Task Schedule</v-toolbar-title>
+      </router-link>
+    </v-toolbar>
     <v-main>
       <router-view />
     </v-main>
@@ -23,7 +16,11 @@ export default {}
 </script>
 
 <style>
-.v-list > a {
+.app-bar__title {
+  color: white;
+  user-select: none;
+}
+.app-bar > .v-toolbar__content > a {
   text-decoration: none;
 }
 .v-list > a > .v-list-item:hover {

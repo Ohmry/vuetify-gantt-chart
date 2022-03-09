@@ -1,14 +1,12 @@
 <template>
-  <v-container fluid>
-    <v-row>
-      <v-col cols="12" md="3" class="pa-0">
-        <TaskList />
-      </v-col>
-      <v-col cols="12" md="9" class="pa-0">
-        <GanttChart />
-      </v-col>
-    </v-row>
-  </v-container>
+  <div class="gantt-view__container">
+    <v-toolbar class="gantt-view__menu-contianer" flat dense>
+    </v-toolbar>
+    <div class="gantt-view__contents-container">
+      <TaskList />
+      <GanttChart />
+    </div>
+  </div>
 </template>
 
 <script>
@@ -24,5 +22,11 @@ export default {
 </script>
 
 <style>
-
+.gantt-view__menu-contianer {
+  border-bottom: 1px solid #26B2A2 !important;
+}
+.gantt-view__contents-container {
+  display: flex;
+  flex-direction: row;
+}
 </style>

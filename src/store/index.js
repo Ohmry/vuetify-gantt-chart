@@ -5,6 +5,10 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    cell: {
+      height: 30,
+      width: 30
+    }
   },
   mutations: {
   },
