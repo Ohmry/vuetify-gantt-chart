@@ -1,10 +1,37 @@
 <template>
   <v-app>
-    <v-toolbar class="app-bar" dense flat max-height="48" color="#5B7347">
+    <v-app-bar color="#5B7347" height="32px" flat>
       <router-link to="/">
-        <v-toolbar-title class="app-bar__title text-h5">Task Schedule</v-toolbar-title>
+        <v-app-bar-title>
+          <v-icon>grass</v-icon>
+          <span>Task Schedule</span>
+        </v-app-bar-title>
       </router-link>
+    </v-app-bar>
+    <v-toolbar flat color="#f5f5f5" height="40px" max-height="40px" style="border-bottom: 1px solid #26B2A2;">
+      <v-toolbar-items class="py-1">
+        <v-btn depressed small class="px-2">
+          New
+          <!-- <v-icon color="#5B7347">add</v-icon> -->
+        </v-btn>
+        <v-btn class="app-btn px-2" depressed small disabled>
+          Edit
+          <!-- <v-icon color="#5B7347">delete_outline</v-icon> -->
+        </v-btn>
+        <v-btn depressed small class="px-2">
+          Delete
+          <!-- <v-icon color="#5B7347">delete_outline</v-icon> -->
+        </v-btn>
+         <v-divider class="mx-2" vertical></v-divider>
+      </v-toolbar-items>
     </v-toolbar>
+    <!-- <v-toolbar class="app-bar" dense flat max-height="48" color="#5B7347">
+      <router-link to="/">
+        <v-toolbar-title class="app-bar__title text-h5">
+          Task Schedule
+        </v-toolbar-title>
+      </router-link>
+    </v-toolbar> -->
     <v-main>
       <router-view />
     </v-main>
@@ -16,6 +43,26 @@ export default {}
 </script>
 
 <style>
+.router-link-active {
+  margin: auto;
+}
+.v-app-bar-title {
+  user-select: none;
+}
+.v-app-bar-title__content {
+  color: white !important;
+  font-size: 18px;
+  text-overflow: unset;
+}
+.v-app-bar-title__content > i {
+  color: white !important;
+  vertical-align: sub !important;
+  margin-right: 5px;
+}
+.app-btn.theme--light.v-btn.v-btn--disabled.v-btn--has-bg {
+  background-color: #F5F5F5 !important;
+}
+
 .app-bar__title {
   color: white;
   user-select: none;
