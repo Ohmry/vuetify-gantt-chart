@@ -28,16 +28,55 @@
       </v-toolbar>
     </v-app-bar>
     <v-main>
-      
+      <v-simple-table class="task-table">
+        <thead>
+          <tr>
+            <th style="min-width: 300px; max-width: 300px;">Subject</th>
+            <th class="text-center" style="min-width: 100px; max-width: 100px;">Start Date</th>
+            <th class="text-center" style="min-width: 100px; max-width: 100px;">Due Date</th>
+            <th class="text-center" style="min-width: 100px; max-width: 100px;">Assigned</th>
+            <th>
+              <svg>
+                <line x1="10" x2="300" y1="10" y2="10" stroke-width="1" stroke="#5B7347" />
+              </svg>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(task, index) in tasks" :key="index">
+            <td>{{ task.subject }}</td>
+            <td class="text-center">{{ task.start }}</td>
+            <td>{{ task.end }}</td>
+            <td>{{ task.assigned }}</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </v-simple-table>
     </v-main>
   </v-app>
 </template>
 
 <script>
-export default {}
+export default {
+  data: () => ({
+    tasks: []
+  }),
+  beforeMount () {
+    this.tasks.push(...Array.from({ length: 100 }, (v, k) => {
+      return { subject: '포인트 부분 사용(매점)_' + k, start: '2022-03-01', end: '2022-03-07', assigned: '' }
+    }))
+  }
+}
 </script>
 
 <style>
+.v-app-bar {
+  position: fixed !important;
+  z-index: 9;
+  top: 0;
+  left: 0;
+}
 .v-app-bar > .v-toolbar__content {
   padding: 0 16px;
 }
@@ -73,6 +112,32 @@ export default {}
 }
 .v-toolbar__items > .v-divider {
   border-color: #90AB6A !important;
+}
+.v-main {
+  margin-top: 40px !important;
+}
+.task-table {
+  border-right: 1px solid #5B7347;
+  border-radius: 0 !important;
+}
+.task-table > .v-data-table__wrapper {
+  overflow: auto;
+  max-height: calc(100vh - 40px);
+  max-width: fit-content !important;
+}
+.task-table > .v-data-table__wrapper > table > thead {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  background-color: white !important;
+}
+.task-table > .v-data-table__wrapper > table > thead > tr > th > svg {
+  display: block;
+  height: 48px;
+}
+.task-table > .v-data-table__wrapper > table > tbody > tr > td {
+  font-size: 12px !important;
+  height: 26px !important;
 }
 
 /*
