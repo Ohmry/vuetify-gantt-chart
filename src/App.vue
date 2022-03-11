@@ -28,34 +28,75 @@
       </v-toolbar>
     </v-app-bar>
     <v-main>
-      <table class="task-table">
-        <colgroup>
-          <col style="width: 300px" />
-          <col style="width: 100px" />
-          <col style="width: 100px" />
-          <col style="width: 100px" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th>Subject</th>
-            <th>Start Date</th>
-            <th>Due Date</th>
-            <th>Assigned</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(task, index) in tasks" :key="index">
-            <td>{{ task.subject }}</td>
-            <td>{{ task.start }}</td>
-            <td>{{ task.end }}</td>
-            <td>{{ task.assigned }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="gantt-chart__wrap">
-        <svg width="1200">
-          <line x1="0" x2="2200" y1="31.5" y2="31.5" stroke-width="1" stroke="#5B7347" />
-        </svg>
+      <div class="header__wrap">
+        <div class="task-header">
+          <table>
+            <colgroup>
+              <col style="width: 200px" />
+              <col style="width: 80px" />
+              <col style="width: 80px" />
+              <col style="width: 100px" />
+              <col style="width: 50px" />
+              <col style="width: 100px" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Start Date</th>
+                <th>Due Date</th>
+                <th>Task</th>
+                <th>System</th>
+                <th>Assigned</th>
+              </tr>
+            </thead>
+          </table>
+          <!-- <div header style="width: 300px">Subject</div>
+          <div header style="width: 100px">Start Date</div>
+          <div header style="width: 100px;">Due Date</div>
+          <div header style="width: 100px;">Assigned</div> -->
+        </div>
+        <div class="gantt-header">
+          <svg :width="days.length * 30" height="50">
+            <line x1="0" :x2="days.length * 30" y1="49.5" y2="49.5" stroke-width="1" stroke="#90AB6A" />
+            <line x1="0" :x2="days.length * 30" y1="24.5" y2="24.5" stroke-width="1" stroke="#90AB6A" />
+            <line v-for="(month, index) in this.months" :key="'month_line_' + index" :x1="month.left + month.width" :x2="month.left + month.width" y1="0" y2="24.5" stroke-width="1" stroke="#26B2A2" />
+            <text class="gantt-calendar__month-text" v-for="(month, index) in this.months" :key="'month_text_' + index" :x="month.left + (month.width - 49.61) / 2" y="17.5" font-size="14">{{ month.label }}</text>
+            <line v-for="(day, index) in this.days" :key="'day_line_' + index" :x1="(index + 1) * 30" :x2="(index + 1) * 30" y1="24.5" y2="49.5" stroke-width="1" stroke="#26B2A2" />
+            <text class="gantt-calendar__day-text" v-for="(day, index) in this.days" :key="'day_text_' + index" :x="(index * 30) + (day.label < 10 ? 11.255 : 7.51)" y="43" :fill="day.color" font-size="14">{{ day.label }}</text>
+          </svg>
+        </div>
+      </div>
+      <div class="contents__wrap">
+        <div class="task-contents">
+          <table>
+            <colgroup>
+              <col style="width: 200px" />
+              <col style="width: 80px" />
+              <col style="width: 80px" />
+              <col style="width: 100px" />
+              <col style="width: 50px" />
+              <col style="width: 100px" />
+            </colgroup>
+            <tbody>
+              <tr v-for="(task, index) in tasks" :key="index">
+                <td>{{ task.subject }}</td>
+                <td>{{ task.start }}</td>
+                <td>{{ task.end }}</td>
+                <td>{{ task.task }}</td>
+                <td>{{ task.system }}</td>
+                <td>{{ task.assigned }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gantt-contents">
+          <svg v-for="(task, index) in tasks" :key="'gantt_' + index" :width="days.length * 30" :height="index > 0 ? 25 : 25.5">
+            <rect v-for="(day, index) in days" :key="'day_rect_' + index" :x="(index) * 30" y="0" width="30" height="30" :fill="day.bgColor" />
+            <line x1="0" :x2="days.length * 30" :y1="index > 0 ? 24.5 : 25" :y2="index > 0 ? 24.5 : 25" :stroke-width="1" stroke="#90AB6A" />
+            <line v-for="(day, index) in days" :key="index" :x1="(index + 1) * 30" :x2="(index + 1) * 30" y1="0" y2="49.5" stroke-width="1" stroke="#90AB6A" />
+            <rect :x="index * 30" y="2" width="300" height="20" fill="#90ab6a" />
+          </svg>
+        </div>
       </div>
     </v-main>
   </v-app>
@@ -64,19 +105,47 @@
 <script>
 export default {
   data: () => ({
-    tasks: []
+    tasks: [],
+    months: [],
+    days: [],
+    width: 0
   }),
   beforeMount () {
-    this.tasks.push(...Array.from({ length: 100 }, (v, k) => {
-      return { subject: '포인트 부분 사용(매점)_' + k, start: '2022-03-01', end: '2022-03-07', assigned: '' }
+    this.tasks.push(...Array.from({ length: 50 }, (v, k) => {
+      return { subject: 'Your Task_' + k, start: '2022-03-01', end: '2022-03-07', task: '분석/설계', system: 'TCS', assigned: 'Ohmry' }
     }))
+    let startDate = new Date(2022, 2, 0)
+    let endDate = new Date(2022, 6, 0)
+    
+    for (let cursor = startDate; cursor <= endDate;) {
+      let monthWidth = this.$store.state.cell.width * cursor.getDate()
+      this.months.push({
+        left: this.width,
+        width: monthWidth,
+        year: cursor.getFullYear(),
+        month: cursor.getMonth() + 1,
+        label: cursor.getFullYear() + '-' + ((cursor.getMonth() + 1) < 10 ? '0' + (cursor.getMonth() + 1) : (cursor.getMonth() + 1))
+      })
+      this.days.push(...Array.from({ length: cursor.getDate() }, (v, k) => {
+        let day = new Date(cursor.getFullYear(), cursor.getMonth(), k + 1)
+        return {
+          label: k + 1,
+          value: cursor.getFullYear() + '' + (cursor.getMonth() + 1 < 10 ? '0' + (cursor.getMonth() + 1) : cursor.getMonth() + 1) + '' + ((k + 1) < 10 ? '0' + (k + 1) : (k + 1)),
+          color: day.getDay() == 0 ? 'red' : day.getDay() == 6 ? 'blue' : 'black',
+          bgColor: day.getDay() == 0 || day.getDay() == 6 ? '#EFEFEF' : 'transparent'
+        }
+      }))
+      this.width += monthWidth
+      cursor.setMonth(cursor.getMonth() + 2)
+      cursor.setDate(0)
+    }
   }
 }
 </script>
 
 <style>
 html {
-  overflow-x: auto !important;
+  /* overflow-x: auto !important; */
 }
 .v-app-bar {
   position: fixed !important;
@@ -123,72 +192,83 @@ html {
 .v-main {
   margin-top: 40px !important;
 }
-.v-main > .v-main__wrap {
-  display: flex;
-  flex-direction: row;
+.v-main__wrap {
+  width: 100vw;
+  height: calc(100vh - 40px);
+  overflow: auto;
 }
-.v-main > .v-main__wrap > .gantt-chart__wrap {
-  flex-shrink: 0;
-}
-.task-table {
-  border-right: 1px solid #5B7347;
-  border-radius: 0 !important;
-  border-collapse: collapse;
-  font-size: 12px;
-  width: fit-content;
-  table-layout: fixed;
-  height: calc(100vh - 80.5px);
-}
-.task-table > thead> tr,
-.task-table > tbody > tr {
-  border-bottom: 1px solid #5B7347;
-}
-.task-table > thead {
+
+.header__wrap {
   position: sticky;
   top: 0;
+  z-index: 2;
+  background-color: white;
+  height: 50px;
+  display: inline-flex;
+  flex-direction: row;
 }
-.task-table > thead > tr > th {
-  font-size: 14px;
+.header__wrap > .task-header {
+  width: 610px;
+  position: sticky;
+  left: 0px;
+  top: 0px;
+  display: inline-flex;
+  flex-direction: row;
+  background-color: #90AB6A;
+  border-bottom: 1px solid #90AB6A;
+  border-right: 1px solid #90AB6A;
+}
+.header__wrap > .task-header > table {
+  width: 610px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.header__wrap > .task-header > table > thead > tr > th {
+  font-size: 12px;
+  vertical-align: bottom;
   padding: 5px 0;
+  color: white;
 }
-.task-table > tbody > tr > td:first-child {
+.header__wrap > .task-header > table > thead > tr > th:first-child {
   text-align: left;
+  padding: 5px 10px;
 }
-.task-table > tbody > tr {
-  border-bottom: 1px solid #5B7347;
+
+.contents__wrap {
+  display: inline-flex;
+  flex-direction: row;
 }
-.task-table > tbody > tr > td {
-  padding: 5px 0;
+.contents__wrap > .task-contents {
+  position: sticky;
+  left: 0;
+  top: 30px;
+  width: 610px;
+  background-color: white;
+  border-right: 1px solid #90AB6A;
+}
+.contents__wrap > .task-contents > table {
+  width: 65px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.contents__wrap > .task-contents > table > tbody > tr {
+  border-bottom: 1px solid #90AB6A;
+  height: 25px;
+}
+.contents__wrap > .task-contents > table > tbody > tr > td {
+  padding: 3px 5px;
+  font-size: 12px;
+}
+.contents__wrap > .task-contents > table > tbody > tr > td:first-child {
+  padding: 3px 10px;
+}
+.contents__wrap > .task-contents > table > tbody > tr > td:not(:first-child) {
   text-align: center;
 }
-.task-table > thead > tr > th > svg,
-.task-table > tbody > tr > td > svg { 
+.contents__wrap > .gantt-contents > svg {
   display: block;
-  height: 24px;
 }
 
-
-
-
-.task-table > .v-data-table__wrapper {
-  overflow: auto;
-  max-height: calc(100vh - 40px);
-  max-width: fit-content !important;
-}
-.task-table > .v-data-table__wrapper > table > thead {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0px;
-  background-color: white !important;
-}
-.task-table > .v-data-table__wrapper > table > thead > tr > th > svg {
-  display: block;
-  height: 48px;
-}
-.task-table > .v-data-table__wrapper > table > tbody > tr > td {
-  font-size: 12px !important;
-  height: 26px !important;
-}
 
 /*
   COLOR URL : https://color.adobe.com/Early-Soft-Summer-color-theme-19546833
