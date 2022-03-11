@@ -28,31 +28,35 @@
       </v-toolbar>
     </v-app-bar>
     <v-main>
-      <v-simple-table class="task-table">
+      <table class="task-table">
+        <colgroup>
+          <col style="width: 300px" />
+          <col style="width: 100px" />
+          <col style="width: 100px" />
+          <col style="width: 100px" />
+        </colgroup>
         <thead>
           <tr>
-            <th style="min-width: 300px; max-width: 300px;">Subject</th>
-            <th class="text-center" style="min-width: 100px; max-width: 100px;">Start Date</th>
-            <th class="text-center" style="min-width: 100px; max-width: 100px;">Due Date</th>
-            <th class="text-center" style="min-width: 100px; max-width: 100px;">Assigned</th>
-            <th>
-              <svg>
-                <line x1="10" x2="300" y1="10" y2="10" stroke-width="1" stroke="#5B7347" />
-              </svg>
-            </th>
+            <th>Subject</th>
+            <th>Start Date</th>
+            <th>Due Date</th>
+            <th>Assigned</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(task, index) in tasks" :key="index">
             <td>{{ task.subject }}</td>
-            <td class="text-center">{{ task.start }}</td>
+            <td>{{ task.start }}</td>
             <td>{{ task.end }}</td>
             <td>{{ task.assigned }}</td>
-            <td>
-            </td>
           </tr>
         </tbody>
-      </v-simple-table>
+      </table>
+      <div class="gantt-chart__wrap">
+        <svg width="1200">
+          <line x1="0" x2="2200" y1="31.5" y2="31.5" stroke-width="1" stroke="#5B7347" />
+        </svg>
+      </div>
     </v-main>
   </v-app>
 </template>
@@ -71,6 +75,9 @@ export default {
 </script>
 
 <style>
+html {
+  overflow-x: auto !important;
+}
 .v-app-bar {
   position: fixed !important;
   z-index: 9;
@@ -116,10 +123,53 @@ export default {
 .v-main {
   margin-top: 40px !important;
 }
+.v-main > .v-main__wrap {
+  display: flex;
+  flex-direction: row;
+}
+.v-main > .v-main__wrap > .gantt-chart__wrap {
+  flex-shrink: 0;
+}
 .task-table {
   border-right: 1px solid #5B7347;
   border-radius: 0 !important;
+  border-collapse: collapse;
+  font-size: 12px;
+  width: fit-content;
+  table-layout: fixed;
+  height: calc(100vh - 80.5px);
 }
+.task-table > thead> tr,
+.task-table > tbody > tr {
+  border-bottom: 1px solid #5B7347;
+}
+.task-table > thead {
+  position: sticky;
+  top: 0;
+}
+.task-table > thead > tr > th {
+  font-size: 14px;
+  padding: 5px 0;
+}
+.task-table > tbody > tr > td:first-child {
+  text-align: left;
+}
+.task-table > tbody > tr {
+  border-bottom: 1px solid #5B7347;
+}
+.task-table > tbody > tr > td {
+  padding: 5px 0;
+  text-align: center;
+}
+.task-table > thead > tr > th > svg,
+.task-table > tbody > tr > td > svg { 
+  display: block;
+  height: 24px;
+}
+
+
+
+
 .task-table > .v-data-table__wrapper {
   overflow: auto;
   max-height: calc(100vh - 40px);
