@@ -1,0 +1,433 @@
+<template>
+  <v-app>
+    <v-app-bar color="#5B7347" height="40px" max-height="40px" flat>
+      <router-link to="/">
+        <v-app-bar-title>
+          <v-icon>grass</v-icon>
+          <span>Gantt Chart</span>
+        </v-app-bar-title>
+      </router-link>
+      <v-toolbar
+        flat
+        color="#5B7347"
+        height="40px"
+        class="v-app-bar-buttons"
+      >
+        <v-toolbar-items>
+          <v-btn depressed small class="px-2" color="#5B7347">
+            New
+          </v-btn>
+          <v-btn class="app-btn px-2" depressed small disabled color="#5B7347">
+            Edit
+          </v-btn>
+          <v-btn depressed small disabled class="px-2" color="#5B7347">
+            Delete
+          </v-btn>
+          <v-divider class="mx-2" vertical></v-divider>
+          <v-item-group mandatory class="view-type-button-group">
+            <v-item v-slot="{ active, toggle }">
+              <v-btn depressed :color="active ? 'white' : '#90AB6A'" @click="toggle">Monthly View</v-btn>
+            </v-item>
+            <v-item v-slot="{ active, toggle }">
+              <v-btn depressed :color="active ? 'white' : '#90AB6A'" @click="toggle">Weekly View</v-btn>
+            </v-item>
+            <v-item v-slot="{ active, toggle }">
+              <v-btn depressed :color="active ? 'white' : '#90AB6A'" @click="toggle">Daily View</v-btn>
+            </v-item>
+          </v-item-group>
+          <v-divider class="mx-2" vertical></v-divider>
+          <div class="d-flex search-text-field__wrap">
+            <div class="icon__wrap">
+              <v-icon color="white">search</v-icon>
+            </div>
+            <div class="text-field__wrap">
+              <input type="text" label="search" />
+            </div>
+          </div>
+        </v-toolbar-items>
+      </v-toolbar>
+    </v-app-bar>
+    <v-main>
+      <div class="header__wrap">
+        <div class="task-header">
+          <table>
+            <colgroup>
+              <col style="width: 200px" />
+              <col style="width: 80px" />
+              <col style="width: 80px" />
+              <col style="width: 100px" />
+              <col style="width: 50px" />
+              <col style="width: 100px" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Start Date</th>
+                <th>Due Date</th>
+                <th>Task</th>
+                <th>System</th>
+                <th>Assigned</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div class="gantt-header" :style="{ width: (days.length * 30) + 'px' }">
+          <svg :width="(days.length * 30) + 'px'" height="25px">
+            <line x1="0px" :x2="(days.length * 30) + 'px'" y1="25px" y2="25px" stroke-width="2" stroke="#90AB6A" />
+            <line v-for="(month, index) in this.months" :key="'month_line_' + index" :x1="month.left + month.width - 0.5 " :x2="month.left + month.width - 0.5" y1="0" y2="25" stroke-width="1" stroke="#26B2A2" />
+            <text class="gantt-calendar__month-text" v-for="(month, index) in this.months" :key="'month_text_' + index" :x="month.left + (month.width - 49.61) / 2" y="17.5" font-size="14">{{ month.label }}</text>
+          </svg>
+          <svg v-for="(day, index) in days" :key="index" width="30" :height="index > 0 ? 25 : 25.5" :style="{ left: (index * 30) + 'px', top: '25px' }">
+            <text class="gantt-calendar__day-text" :x="(day.label < 10 ? 11 : 7.255)" :y="17" :fill="day.color" font-size="14">{{ day.label }}</text>
+            <line x1="30" x2="30" y1="0" :y2="index > 0 ? 25 : 25.5" stroke-width="2" stroke="#90AB6A" />
+            <line x1="0" x2="30" :y1="index > 0 ? 25 : 24" :y2="index > 0 ? 25 : 24" :stroke-width="index > 0 ? 2 : 1" stroke="#90AB6A" />
+          </svg>
+        </div>
+        <div class="slider"></div>
+      </div>
+      <div class="contents__wrap">
+        <div class="task-contents">
+          <table>
+            <colgroup>
+              <col style="width: 200px" />
+              <col style="width: 80px" />
+              <col style="width: 80px" />
+              <col style="width: 100px" />
+              <col style="width: 50px" />
+              <col style="width: 100px" />
+            </colgroup>
+            <tbody>
+              <tr v-for="(task, index) in tasks" :key="index">
+                <td>{{ task.subject }}</td>
+                <td>{{ task.start }}</td>
+                <td>{{ task.end }}</td>
+                <td>{{ task.task }}</td>
+                <td>{{ task.system }}</td>
+                <td>{{ task.assigned }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gantt-contents">
+          <div class="gantt__wrap" v-for="(task, index) in tasks" :key="'gantt__wrap_' + index" :style="{ width: days.length * 30 + 'px', height: (index > 0 ? 25 : 25.5) + 'px' }">
+            <svg v-for="(day, index) in days" :key="index" width="30" :height="index > 0 ? 25 : 25.5" :style="{ left: (index * 30) + 'px' }">
+              <rect v-if="day.weekend" width="30" :height="index > 0 ? 24 : 25.5" :fill="day.bgColor" />
+              <line x1="30" x2="30" y1="0" y2="30" stroke-width="2" stroke="#90AB6A" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </v-main>
+  </v-app>
+</template>
+
+<script>
+export default {
+  data: () => ({
+    tasks: [],
+    months: [],
+    days: [],
+    width: 0
+  }),
+  beforeMount () {
+    this.tasks.push(...Array.from({ length: 50 }, (v, k) => {
+      return { subject: 'Your Task_' + k, start: '2022-03-01', end: '2022-03-07', task: k % 2 == 0 ? 'Analysis' : 'Design', system: 'TCS', assigned: 'Ohmry' }
+    }))
+    let startDate = new Date(2022, 2, 0)
+    let endDate = new Date(2022, 6, 0)
+    
+    for (let cursor = startDate; cursor <= endDate;) {
+      let monthWidth = this.$store.state.cell.width * cursor.getDate()
+      this.months.push({
+        left: this.width,
+        width: monthWidth,
+        year: cursor.getFullYear(),
+        month: cursor.getMonth() + 1,
+        label: cursor.getFullYear() + '-' + ((cursor.getMonth() + 1) < 10 ? '0' + (cursor.getMonth() + 1) : (cursor.getMonth() + 1))
+      })
+      this.days.push(...Array.from({ length: cursor.getDate() }, (v, k) => {
+        let day = new Date(cursor.getFullYear(), cursor.getMonth(), k + 1)
+        return {
+          label: k + 1,
+          value: cursor.getFullYear() + '' + (cursor.getMonth() + 1 < 10 ? '0' + (cursor.getMonth() + 1) : cursor.getMonth() + 1) + '' + ((k + 1) < 10 ? '0' + (k + 1) : (k + 1)),
+          color: day.getDay() == 0 ? 'red' : day.getDay() == 6 ? 'blue' : 'black',
+          weekend: day.getDay() == 0 || day.getDay() == 6,
+          bgColor: day.getDay() == 0 || day.getDay() == 6 ? '#EFEFEF' : 'transparent'
+        }
+      }))
+      this.width += monthWidth
+      cursor.setMonth(cursor.getMonth() + 2)
+      cursor.setDate(0)
+    }
+  }
+}
+</script>
+
+<style>
+html {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+.v-app-bar {
+  position: fixed !important;
+  z-index: 9;
+  top: 0;
+  left: 0;
+}
+.v-app-bar > .v-toolbar__content {
+  padding: 0 16px;
+}
+.v-app-bar-buttons > .v-toolbar__content {
+  padding: 0 16px;
+}
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items {
+  padding: 0;
+}
+.router-link-active {
+  margin: auto;
+}
+.v-app-bar-title {
+  user-select: none;
+  text-overflow: unset;
+}
+.v-app-bar-title__content {
+  color: white !important;
+  font-size: 18px;
+  text-overflow: unset;
+}
+.v-app-bar-title__content > i {
+  color: white !important;
+  vertical-align: sub !important;
+  margin-right: 5px;
+}
+.v-toolbar__items > button {
+  color: white !important;
+}
+.v-toolbar__items > .theme--light.v-btn.v-btn--disabled.v-btn--has-bg {
+  color: #90AB6A !important;
+  background-color: transparent !important;
+}
+.v-toolbar__items > .v-divider {
+  border-color: #90AB6A !important;
+}
+.v-toolbar__items > .v-divider.v-divider--vertical {
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  margin-top: 6px;
+}
+.v-toolbar__items > .search-text-field__wrap {
+  height: 28px;
+  margin: auto 0;
+  border: 0.5px solid #90AB6A;
+  border-radius: 16px;
+}
+.v-toolbar__items > .search-text-field__wrap > .icon__wrap {
+  width: 27px;
+  height: 28px;
+}
+.v-toolbar__items > .search-text-field__wrap > .icon__wrap > i {
+  font-size: 18px !important;
+  height: 100%;
+  padding: 0 5px;
+  margin: auto;
+  color: #90AB6A !important;
+  /* margin: -1px 0px 0px 0px; */
+}
+.v-toolbar__items > .search-text-field__wrap > .text-field__wrap {
+  width: 210px;
+}
+.v-toolbar__items > .search-text-field__wrap > .text-field__wrap > input {
+  height: 24px;
+  width: 100%;
+  margin: 2px 0;
+  border: 0;
+  font-size: 0.75em;
+  color: white;
+}
+.v-toolbar__items > .search-text-field__wrap > .text-field__wrap > input:focus {
+  outline: 0;
+}
+
+
+.view-type-button-group > button {
+  background-color: transparent !important;
+  color: #90AB6A !important;
+  font-size: 0.75em !important;
+  border-radius: 0px;
+  height: 100%;
+  min-height: 100%;
+  max-height: 100%;
+}
+.view-type-button-group > button.v-item--active {
+  background-color: transparent !important;
+  color: white !important;
+}
+
+.v-main {
+  margin-top: 40px !important;
+}
+.v-main__wrap {
+  width: 100vw;
+  height: calc(100vh - 40px);
+  overflow: auto;
+}
+
+.header__wrap {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: white;
+  height: 50px;
+  display: inline-flex;
+  flex-direction: row;
+}
+.header__wrap > .task-header {
+  width: 610px;
+  position: sticky;
+  left: 0px;
+  top: 0px;
+  z-index: 2;
+  display: inline-flex;
+  flex-direction: row;
+  background-color: #90AB6A;
+  border-bottom: 1px solid #90AB6A;
+  border-right: 1px solid #90AB6A;
+}
+.header__wrap > .task-header > table {
+  width: 610px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.header__wrap > .task-header > table > thead > tr > th {
+  font-size: 12px;
+  vertical-align: bottom;
+  padding: 5px 0;
+  color: white;
+}
+.header__wrap > .task-header > table > thead > tr > th:first-child {
+  text-align: left;
+  padding: 5px 10px;
+}
+.header__wrap > .gantt-header {
+  position: relative;
+  background-color: white;
+}
+.header__wrap > .gantt-header > svg {
+  position: absolute;
+  display: block;
+}
+
+.contents__wrap {
+  display: inline-flex;
+  flex-direction: row;
+}
+.contents__wrap > .task-contents {
+  position: sticky;
+  left: 0;
+  top: 30px;
+  width: 610px;
+  background-color: white;
+  border-right: 1px solid #90AB6A;
+  z-index: 2;
+}
+.contents__wrap > .task-contents > table {
+  width: 65px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.contents__wrap > .task-contents > table > tbody > tr {
+  border-bottom: 1px solid #90AB6A;
+  height: 25px;
+}
+.contents__wrap > .task-contents > table > tbody > tr > td {
+  padding: 3px 5px;
+  font-size: 12px;
+}
+.contents__wrap > .task-contents > table > tbody > tr > td:first-child {
+  padding: 3px 10px;
+}
+.contents__wrap > .task-contents > table > tbody > tr > td:not(:first-child) {
+  text-align: center;
+}
+.contents__wrap > .gantt-contents > .gantt__wrap {
+  position: relative;
+  border-bottom: 1px solid #90AB6A;
+}
+.contents__wrap > .gantt-contents > .gantt__wrap > svg {
+  display: block;
+  position: absolute;
+}
+
+.slider {
+  width: 2px;
+  height: calc(100vh - 50px);
+  background-color: #5B7347;
+  position: absolute;
+  top: 50px;
+  left: 608px;
+}
+.slider:hover {
+  cursor: ew-resize;
+}
+.slider:active {
+  width: 6px;
+  margin-left: -2px;
+  transition: 0.2s;
+}
+
+
+/*
+  COLOR URL : https://color.adobe.com/Early-Soft-Summer-color-theme-19546833
+*/
+/* Color Theme Swatches in Hex */
+.Early-Soft-Summer-1-hex {
+  color: #5b7347;
+}
+.Early-Soft-Summer-2-hex {
+  color: #90ab6a;
+}
+.Early-Soft-Summer-3-hex {
+  color: #afcf95;
+}
+.Early-Soft-Summer-4-hex {
+  color: #f1e7e1;
+}
+.Early-Soft-Summer-5-hex {
+  color: #e3c1c9;
+}
+
+/* Color Theme Swatches in RGBA */
+.Early-Soft-Summer-1-rgba {
+  color: rgba(91, 115, 71, 1);
+}
+.Early-Soft-Summer-2-rgba {
+  color: rgba(144, 171, 106, 1);
+}
+.Early-Soft-Summer-3-rgba {
+  color: rgba(175, 207, 149, 1);
+}
+.Early-Soft-Summer-4-rgba {
+  color: rgba(241, 231, 225, 1);
+}
+.Early-Soft-Summer-5-rgba {
+  color: rgba(227, 193, 201, 1);
+}
+
+/* Color Theme Swatches in HSLA */
+.Early-Soft-Summer-1-hsla {
+  color: hsla(92, 23, 36, 1);
+}
+.Early-Soft-Summer-2-hsla {
+  color: hsla(84, 27, 54, 1);
+}
+.Early-Soft-Summer-3-hsla {
+  color: hsla(93, 37, 69, 1);
+}
+.Early-Soft-Summer-4-hsla {
+  color: hsla(22, 36, 91, 1);
+}
+.Early-Soft-Summer-5-hsla {
+  color: hsla(345, 37, 82, 1);
+}
+</style>

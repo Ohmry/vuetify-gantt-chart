@@ -1,55 +1,40 @@
 <template>
   <v-app>
-    <v-app-bar color="#5B7347" height="40px" max-height="40px" flat>
-      <router-link to="/">
-        <v-app-bar-title>
-          <v-icon>grass</v-icon>
-          <span>Gantt Chart</span>
-        </v-app-bar-title>
-      </router-link>
-      <v-toolbar
-        flat
-        color="#5B7347"
-        height="40px"
-        class="v-app-bar-buttons"
-      >
-        <v-toolbar-items>
-          <v-btn depressed small class="px-2" color="#5B7347">
-            New
-          </v-btn>
-          <v-btn class="app-btn px-2" depressed small disabled color="#5B7347">
-            Edit
-          </v-btn>
-          <v-btn depressed small disabled class="px-2" color="#5B7347">
-            Delete
-          </v-btn>
-          <v-divider class="mx-2" vertical></v-divider>
-          <v-item-group mandatory class="view-type-button-group">
-            <v-item v-slot="{ active, toggle }">
-              <v-btn depressed :color="active ? 'white' : '#90AB6A'" @click="toggle">Monthly View</v-btn>
-            </v-item>
-            <v-item v-slot="{ active, toggle }">
-              <v-btn depressed :color="active ? 'white' : '#90AB6A'" @click="toggle">Weekly View</v-btn>
-            </v-item>
-            <v-item v-slot="{ active, toggle }">
-              <v-btn depressed :color="active ? 'white' : '#90AB6A'" @click="toggle">Daily View</v-btn>
-            </v-item>
-          </v-item-group>
-          <v-divider class="mx-2" vertical></v-divider>
-          <div class="d-flex search-text-field__wrap">
-            <div class="icon__wrap">
-              <v-icon color="white">search</v-icon>
+    <!-- App Header -->
+    <v-app-bar flat>
+        <!-- Logo -->
+        <router-link to="/">
+          <v-app-bar-title>
+            <v-icon>grass</v-icon>
+            <span>Gantt Chart</span>
+          </v-app-bar-title>
+        </router-link>
+        <!-- Menu -->
+        <v-toolbar flat class="v-app-bar-buttons">
+          <v-toolbar-items>
+            <v-btn v-for="(menu, index) in system.menu.function" :key="'v-app-bar-button_' + index" depressed small :disabled="menu.disabled" class="px-2">
+              {{ menu.label }}
+            </v-btn>
+            <v-divider vertical></v-divider>
+            <!-- View Mode -->
+            <v-item-group mandatory class="v-gantt-view-mode-buttons">
+              <v-item v-for="(menu, index) in system.menu.viewMode" :key="'v-gantt-view-mode-button_' + index" v-slot="{ active, toggle }">
+                <v-btn depressed @click="toggle">{{ menu.label }}</v-btn>
+              </v-item>
+            </v-item-group>
+            <v-divider vertical></v-divider>
+            <!-- Search -->
+            <div class="d-flex v-gantt-search-field">
+              <v-icon @click="system.menu.search.visible = !system.menu.search.visible">search</v-icon>
+              <input type="text" label="search" placeholder="Enter keyword you want to find" :style="{ width: system.menu.search.visible ? '' : '0px', marginLeft: system.menu.search.visible ? '' : '-14px' }"/>
             </div>
-            <div class="text-field__wrap">
-              <input type="text" label="search" />
-            </div>
-          </div>
-        </v-toolbar-items>
-      </v-toolbar>
+          </v-toolbar-items>
+        </v-toolbar>
     </v-app-bar>
     <v-main>
-      <div class="header__wrap">
-        <div class="task-header">
+      <!-- Task -->
+      <div class="task-container__wrap">
+        <div class="task-header__wrap">
           <table>
             <colgroup>
               <col style="width: 200px" />
@@ -71,26 +56,7 @@
             </thead>
           </table>
         </div>
-        <div class="gantt-header" :style="{ width: (days.length * 30) + 'px' }">
-          <svg :width="(days.length * 30) + 'px'" height="25px">
-            <line x1="0px" :x2="(days.length * 30) + 'px'" y1="25px" y2="25px" stroke-width="2" stroke="#90AB6A" />
-            <line v-for="(month, index) in this.months" :key="'month_line_' + index" :x1="month.left + month.width - 0.5 " :x2="month.left + month.width - 0.5" y1="0" y2="25" stroke-width="1" stroke="#26B2A2" />
-            <text class="gantt-calendar__month-text" v-for="(month, index) in this.months" :key="'month_text_' + index" :x="month.left + (month.width - 49.61) / 2" y="17.5" font-size="14">{{ month.label }}</text>
-          </svg>
-          <svg v-for="(day, index) in days" :key="index" width="30" :height="index > 0 ? 25 : 25.5" :style="{ left: (index * 30) + 'px', top: '25px' }">
-            <text class="gantt-calendar__day-text" :x="(day.label < 10 ? 11 : 7.255)" :y="17" :fill="day.color" font-size="14">{{ day.label }}</text>
-            <line x1="30" x2="30" y1="0" :y2="index > 0 ? 25 : 25.5" stroke-width="2" stroke="#90AB6A" />
-            <line x1="0" x2="30" :y1="index > 0 ? 25 : 24" :y2="index > 0 ? 25 : 24" :stroke-width="index > 0 ? 2 : 1" stroke="#90AB6A" />
-          </svg>
-          <!-- <svg :width="(days.length * 30) + 'px'" height="25px" :viewBox="'0 0 ' + (days.length * 30) + ' 25'" style="top: 25px;">
-            <line x1="0px" :x2="(days.length * 30) + 'px'" y1="25px" y2="25px" stroke-width="1" stroke="#90AB6A" />
-            <line v-for="(day, index) in this.days" :key="'day_line_' + index" :x1="(index + 1) * 30" :x2="(index + 1) * 30" y1="0" y2="25" stroke-width="1" stroke="#90AB6A" />
-            <text class="gantt-calendar__day-text" v-for="(day, index) in this.days" :key="'day_text_' + index" :x="(index * 30) + (day.label < 10 ? 11.255 : 7.51)" y="43" :fill="day.color" font-size="14">{{ day.label }}</text>
-          </svg> -->
-        </div>
-      </div>
-      <div class="contents__wrap">
-        <div class="task-contents">
+        <div class="task-contents__wrap">
           <table>
             <colgroup>
               <col style="width: 200px" />
@@ -101,22 +67,39 @@
               <col style="width: 100px" />
             </colgroup>
             <tbody>
-              <tr v-for="(task, index) in tasks" :key="index">
-                <td>{{ task.subject }}</td>
-                <td>{{ task.start }}</td>
-                <td>{{ task.end }}</td>
-                <td>{{ task.task }}</td>
-                <td>{{ task.system }}</td>
-                <td>{{ task.assigned }}</td>
+              <tr v-for="(subject, index) in subjects" :key="'subject_' + index">
+                <td>{{ subject.name }}</td>
+                <td>{{ subject.start.substring(0, 4) + '-' + subject.start.substring(4, 6) + '-' + subject.start.substring(6, 8) }}</td>
+                <td>{{ subject.end.substring(0, 4) + '-' + subject.end.substring(4, 6) + '-' + subject.end.substring(6, 8) }}</td>
+                <td>{{ subject.task }}</td>
+                <td>{{ subject.system }}</td>
+                <td>{{ subject.assigned }}</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="gantt-contents">
-          <div class="gantt__wrap" v-for="(task, index) in tasks" :key="'gantt__wrap_' + index" :style="{ width: days.length * 30 + 'px', height: (index > 0 ? 25 : 25.5) + 'px' }">
-            <svg v-for="(day, index) in days" :key="index" width="30" :height="index > 0 ? 25 : 25.5" :style="{ left: (index * 30) + 'px' }">
-              <rect v-if="day.weekend" width="30" :height="index > 0 ? 24 : 25.5" :fill="day.bgColor" />
-              <line x1="30" x2="30" y1="0" y2="30" stroke-width="2" stroke="#90AB6A" />
+      </div>
+      <!-- Gantt -->
+      <div class="gantt-container__wrap">
+        <div class="gantt-header__wrap" :style="{ width: calendar.width + 'px' }">
+          <svg class="gantt-calendar-month__wrap" v-for="(month, index) in calendar.months" :key="'gantt-calendar-month_' + index" :style="{ width: month.width + 'px', left: month.left + 'px' }" >
+            <text :x="(month.width - 49.61) / 2" y="17.5" font-size="14">{{ month.label }}</text>
+            <line x1="0px" :x2="month.width" y1="25px" y2="25px" />
+            <line :x1="month.width" :x2="month.width" y1="0px" y2="25px" />
+          </svg>
+          <svg class="gantt-calendar-day__wrap" v-for="(day, index) in calendar.days" :key="'gantt-calendar-day_' + index" :style="{ left: (index * 30) + 'px'  }">
+            <text :x="(day.label < 10 ? 11 : 7.255) + 'px'" y="17px" :fill="day.color" font-size="14">{{ day.label }}</text>
+            <line x1="0px" x2="30px" y1="25px" y2="25px" />
+            <line x1="30px" x2="30px" y1="0px" y2="25px" />
+          </svg>
+        </div>
+        <div class="gantt-contents__wrap">
+          <div class="gantt-cell__wrap" v-for="(subject, index) in subjects" :key="'gantt-cell_' + index">
+            <svg v-for="(day, index) in calendar.days" :key="'gantt-cell_day_' + index" :style="{ left: (index * 30) + 'px' }">
+              <rect v-if="day.weekend" width="30" height="25px" :fill="day.bgColor" />
+              <line x1="30px" x2="30px" y1="0px" y2="25px" />
+              <rect class="gantt-cell-bar" v-if="day.value >= subject.start && day.value <= subject.end" y="2px" :x="(day.value == subject.start ? 2 : 0) + 'px'" />
+              <line x1="0px" x2="30px" y1="25px" y2="25px" />
             </svg>
           </div>
         </div>
@@ -128,28 +111,67 @@
 <script>
 export default {
   data: () => ({
-    tasks: [],
-    months: [],
-    days: [],
-    width: 0
+    system: {
+      menu: {
+        function: [
+          { label: 'New', disabled: false },
+          { label: 'Edit', disabled: true },
+          { label: 'Delete', disabled: false }
+        ],
+        viewMode: [
+          { label: 'Daily' },
+          { label: 'Weekly' },
+          { label: 'Monthy' }
+        ],
+        search: {
+          visible: false
+        }
+      }
+    },
+    calendar: {
+      width: 0,
+      months: [],
+      days: []
+    },
+    subjects: []
   }),
   beforeMount () {
-    this.tasks.push(...Array.from({ length: 50 }, (v, k) => {
-      return { subject: 'Your Task_' + k, start: '2022-03-01', end: '2022-03-07', task: k % 2 == 0 ? 'Analysis' : 'Design', system: 'TCS', assigned: 'Ohmry' }
+    this.subjects.push(...Array.from({ length: 40 }, (v, k) => {
+      let year = 2022
+      let month = Math.round(Math.random() * 10 % 5 + 1)
+      let lastDay = new Date(year, month, 0).getDate()
+      let startDay = Math.round(Math.random() * lastDay)
+      let endDay = startDay + Math.round(Math.random() * 10)
+      let start = new Date(year, month, startDay)
+      let end = new Date(year, month, endDay)
+      let startValue = start.getFullYear() + '' + ((start.getMonth() + 1) < 10 ? '0' + (start.getMonth() + 1) : (start.getMonth() + 1)) + '' + (start.getDate() < 10 ? '0' + start.getDate() : start.getDate())
+      let endValue = end.getFullYear() + '' + ((end.getMonth() + 1) < 10 ? '0' + (end.getMonth() + 1) : (end.getMonth() + 1)) + '' + (end.getDate() < 10 ? '0' + end.getDate() : end.getDate())
+      
+      let task = ['Analysis', 'Design', 'Develop', 'Test', 'Deploy']
+
+      return {
+        name: 'Subject Example (' + k + ')',
+        start: startValue,
+        end: endValue,
+        task: task[Math.round(Math.random() * 5)],
+        system: 'TCS',
+        assigned: 'Ohmry'
+      }
     }))
+    
     let startDate = new Date(2022, 2, 0)
     let endDate = new Date(2022, 6, 0)
     
     for (let cursor = startDate; cursor <= endDate;) {
       let monthWidth = this.$store.state.cell.width * cursor.getDate()
-      this.months.push({
-        left: this.width,
+      this.calendar.months.push({
+        left: this.calendar.width,
         width: monthWidth,
         year: cursor.getFullYear(),
         month: cursor.getMonth() + 1,
         label: cursor.getFullYear() + '-' + ((cursor.getMonth() + 1) < 10 ? '0' + (cursor.getMonth() + 1) : (cursor.getMonth() + 1))
       })
-      this.days.push(...Array.from({ length: cursor.getDate() }, (v, k) => {
+      this.calendar.days.push(...Array.from({ length: cursor.getDate() }, (v, k) => {
         let day = new Date(cursor.getFullYear(), cursor.getMonth(), k + 1)
         return {
           label: k + 1,
@@ -159,7 +181,7 @@ export default {
           bgColor: day.getDay() == 0 || day.getDay() == 6 ? '#EFEFEF' : 'transparent'
         }
       }))
-      this.width += monthWidth
+      this.calendar.width += monthWidth
       cursor.setMonth(cursor.getMonth() + 2)
       cursor.setDate(0)
     }
@@ -167,253 +189,230 @@ export default {
 }
 </script>
 
-<style>
-html {
-  overflow: hidden !important;
-  height: 100vh !important;
-}
+<style lang="scss">
 .v-app-bar {
   position: fixed !important;
-  z-index: 9;
   top: 0;
   left: 0;
+  height: 40px !important;
+  max-height: 40px !important;
+  background-color: $theme-color-primary !important;
 }
 .v-app-bar > .v-toolbar__content {
-  padding: 0 16px;
+  height: 40px !important;
 }
-.v-app-bar-buttons > .v-toolbar__content {
-  padding: 0 16px;
-}
-.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items {
-  padding: 0;
-}
+/* Logo ================================================= */
 .router-link-active {
   margin: auto;
+  height: 100%;
+  color: white !important;
 }
-.v-app-bar-title {
-  user-select: none;
-  text-overflow: unset;
+.router-link-active:active {
+  margin: auto;
+  height: 100%;
+  color: #AFCF95 !important;
 }
 .v-app-bar-title__content {
-  color: white !important;
   font-size: 18px;
   text-overflow: unset;
 }
 .v-app-bar-title__content > i {
-  color: white !important;
   vertical-align: sub !important;
-  margin-right: 5px;
+  margin: 0 5px 0 0;
+  color: inherit !important;
+  transition: 0s !important;
 }
-.v-toolbar__items > button {
+/* Logo ================================================= */
+/* Menu ================================================= */
+.v-app-bar-buttons {
+  height: 40px !important;
+  background-color: $theme-color-primary !important;
+}
+.v-app-bar-buttons > .v-toolbar__content {
+  padding: 0 16px;
+  height: inherit !important;
+}
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > button {
+  background-color: $theme-color-primary !important;
   color: white !important;
 }
-.v-toolbar__items > .theme--light.v-btn.v-btn--disabled.v-btn--has-bg {
-  color: #90AB6A !important;
-  background-color: transparent !important;
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > button.v-btn--disabled {
+  color: $theme-color-secondary !important;
+  background-color: $theme-color-primary !important;
 }
-.v-toolbar__items > .v-divider {
-  border-color: #90AB6A !important;
-}
-.v-toolbar__items > .v-divider.v-divider--vertical {
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > .v-divider {
+  border-color: $theme-color-secondary !important;
   height: 28px !important;
-  min-height: 28px !important;
   max-height: 28px !important;
-  margin-top: 6px;
+  min-height: 28px !important;
+  padding: 0 0 0 6px !important;
+  margin: 6px 6px 6px 0 !important;
 }
-.v-toolbar__items > .search-text-field__wrap {
-  height: 28px;
-  margin: auto 0;
-  border: 0.5px solid white;
-  border-radius: 16px;
-}
-.v-toolbar__items > .search-text-field__wrap > .icon__wrap {
-  width: 27px;
-  height: 28px;
-}
-.v-toolbar__items > .search-text-field__wrap > .icon__wrap > i {
-  font-size: 18px !important;
-  height: 100%;
-  padding: 0 5px;
-  margin: auto;
-  /* margin: -1px 0px 0px 0px; */
-}
-.v-toolbar__items > .search-text-field__wrap > .text-field__wrap {
-  width: 210px;
-}
-.v-toolbar__items > .search-text-field__wrap > .text-field__wrap > input {
-  height: 24px;
-  width: 100%;
-  margin: 2px 0;
-  border: 0;
-  font-size: 0.75em;
-  color: white;
-}
-.v-toolbar__items > .search-text-field__wrap > .text-field__wrap > input:focus {
-  outline: 0;
-}
-
-
-.view-type-button-group > button {
-  background-color: transparent !important;
-  color: #90AB6A !important;
-  font-size: 0.75em !important;
-  border-radius: 0px;
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > .v-gantt-view-mode-buttons > button {
   height: 100%;
   min-height: 100%;
   max-height: 100%;
+  border-radius: 0;
+  background-color: $theme-color-primary !important;
+  color: $theme-color-secondary !important;
+  font-size: 0.75em;  
 }
-.view-type-button-group > button.v-item--active {
-  background-color: transparent !important;
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > .v-gantt-view-mode-buttons > button:hover {
+  color: #AFCF95 !important;
+  transition: 0.28s;
+}
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > .v-gantt-view-mode-buttons > button.v-item--active {
   color: white !important;
 }
-
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > .v-gantt-search-field {
+  padding: 6px 0;
+  border: 1px solid $theme-color-secondary;
+  border-radius: 14px;
+  height: 28px;
+  min-width: 28px;
+  margin: auto 0 auto 14px;
+}
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > .v-gantt-search-field > button {
+  font-size: 18px;
+  height: 18px;
+  margin: -1.5px 0px 0px 4.2px;
+  color: $theme-color-secondary !important;
+}
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > .v-gantt-search-field > input {
+  color: white !important;
+  font-size: 0.75em;
+  margin: 0 10px;
+  width: 200px;
+  transition: 0.3s;
+}
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > .v-gantt-search-field > input:focus {
+  outline: 0;
+}
+.v-app-bar-buttons > .v-toolbar__content > .v-toolbar__items > .v-gantt-search-field > input::placeholder {
+  color: $theme-color-secondary !important;
+}
+/* Menu ================================================= */
+/* Main ================================================= */
 .v-main {
   margin-top: 40px !important;
 }
-.v-main__wrap {
+.v-main > .v-main__wrap {
   width: 100vw;
   height: calc(100vh - 40px);
   overflow: auto;
-}
-
-.header__wrap {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background-color: white;
-  height: 50px;
   display: inline-flex;
   flex-direction: row;
 }
-.header__wrap > .task-header {
+.v-main > .v-main__wrap > .task-container__wrap {
   width: 610px;
+  height: calc(100vh - 40px);
   position: sticky;
   left: 0px;
-  top: 0px;
-  z-index: 2;
-  display: inline-flex;
-  flex-direction: row;
-  background-color: #90AB6A;
-  border-bottom: 1px solid #90AB6A;
-  border-right: 1px solid #90AB6A;
+  z-index: 3;
 }
-.header__wrap > .task-header > table {
-  width: 610px;
+/* Main ================================================= */
+/* Task Header ================================================= */
+.v-main > .v-main__wrap > .task-container__wrap > .task-header__wrap {
+  position: sticky;
+  top: 0px;
+  left: 0;
+  z-index: 3;
+  height: 50px;
+  background-color: $theme-color-secondary;
+  border-bottom: 1px solid $theme-color-primary;
+}
+.v-main > .v-main__wrap > .task-container__wrap > .task-header__wrap > table {
+  width: 100%;
+  height: 100%;
   table-layout: fixed;
   border-collapse: collapse;
+  user-select: none;
 }
-.header__wrap > .task-header > table > thead > tr > th {
+.v-main > .v-main__wrap > .task-container__wrap > .task-header__wrap > table > thead > tr {
+  border-right: 1px solid $theme-color-primary;
+}
+.v-main > .v-main__wrap > .task-container__wrap > .task-header__wrap > table > thead > tr > th {
   font-size: 12px;
   vertical-align: bottom;
   padding: 5px 0;
   color: white;
 }
-.header__wrap > .task-header > table > thead > tr > th:first-child {
+.v-main > .v-main__wrap > .task-container__wrap > .task-header__wrap > table > thead > tr > th:first-child {
   text-align: left;
   padding: 5px 10px;
 }
-.header__wrap > .gantt-header {
-  position: relative;
+/* Task Header ================================================= */
+/* Task Contents ================================================= */
+.v-main > .v-main__wrap > .task-container__wrap > .task-contents__wrap {
   background-color: white;
 }
-.header__wrap > .gantt-header > svg {
-  position: absolute;
-  display: block;
-}
-
-.contents__wrap {
-  display: inline-flex;
-  flex-direction: row;
-}
-.contents__wrap > .task-contents {
-  position: sticky;
-  left: 0;
-  top: 30px;
+.v-main > .v-main__wrap > .task-container__wrap > .task-contents__wrap > table {
   width: 610px;
-  background-color: white;
-  border-right: 1px solid #90AB6A;
-  z-index: 2;
-}
-.contents__wrap > .task-contents > table {
-  width: 65px;
   table-layout: fixed;
   border-collapse: collapse;
 }
-.contents__wrap > .task-contents > table > tbody > tr {
-  border-bottom: 1px solid #90AB6A;
-  height: 25px;
+.v-main > .v-main__wrap > .task-container__wrap > .task-contents__wrap > table > tbody > tr {
+  border-bottom: 1px solid $theme-color-secondary;
+  border-right: 1px solid $theme-color-primary;
+  height: 24px;
 }
-.contents__wrap > .task-contents > table > tbody > tr > td {
-  padding: 3px 5px;
+.v-main > .v-main__wrap > .task-container__wrap > .task-contents__wrap > table > tbody > tr > td {
   font-size: 12px;
+  padding: 3px 5px;
 }
-.contents__wrap > .task-contents > table > tbody > tr > td:first-child {
+.v-main > .v-main__wrap > .task-container__wrap > .task-contents__wrap > table > tbody > tr > td:first-child {
   padding: 3px 10px;
 }
-.contents__wrap > .task-contents > table > tbody > tr > td:not(:first-child) {
+.v-main > .v-main__wrap > .task-container__wrap > .task-contents__wrap > table > tbody > tr > td:not(:first-child) {
   text-align: center;
 }
-.contents__wrap > .gantt-contents > .gantt__wrap {
-  position: relative;
-  border-bottom: 1px solid #90AB6A;
+/* Task Contents ================================================= */
+/* Gantt Header ================================================= */
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-header__wrap {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  height: 50px;
+  user-select: none;
 }
-.contents__wrap > .gantt-contents > .gantt__wrap > svg {
-  display: block;
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-header__wrap > svg {
   position: absolute;
+  display: block;
+  background-color: white;
 }
-
-
-/*
-  COLOR URL : https://color.adobe.com/Early-Soft-Summer-color-theme-19546833
-*/
-/* Color Theme Swatches in Hex */
-.Early-Soft-Summer-1-hex {
-  color: #5b7347;
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-header__wrap > svg > line {
+  stroke-width: 1;
+  stroke: $theme-color-primary;
 }
-.Early-Soft-Summer-2-hex {
-  color: #90ab6a;
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-header__wrap > svg.gantt-calendar-month__wrap {
+  height: 25px;
 }
-.Early-Soft-Summer-3-hex {
-  color: #afcf95;
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-header__wrap > svg.gantt-calendar-day__wrap {
+  top: 25px;
+  width: 30px;
+  height: 25px;
 }
-.Early-Soft-Summer-4-hex {
-  color: #f1e7e1;
+/* Gantt Header ================================================= */
+/* Gantt Contents ================================================= */
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap {
+  position: relative;
+  height: 25px;
 }
-.Early-Soft-Summer-5-hex {
-  color: #e3c1c9;
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg {
+  position: absolute;
+  display: block;
+  width: 30px;
+  height: 25px;
 }
-
-/* Color Theme Swatches in RGBA */
-.Early-Soft-Summer-1-rgba {
-  color: rgba(91, 115, 71, 1);
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg > line {
+  stroke-width: 1;
+  stroke: $theme-color-primary;
 }
-.Early-Soft-Summer-2-rgba {
-  color: rgba(144, 171, 106, 1);
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg > rect.gantt-cell-bar:not(:first-child) {
+  width: 30px;
+  height: 20px;
+  fill: $theme-color-secondary;
 }
-.Early-Soft-Summer-3-rgba {
-  color: rgba(175, 207, 149, 1);
-}
-.Early-Soft-Summer-4-rgba {
-  color: rgba(241, 231, 225, 1);
-}
-.Early-Soft-Summer-5-rgba {
-  color: rgba(227, 193, 201, 1);
-}
-
-/* Color Theme Swatches in HSLA */
-.Early-Soft-Summer-1-hsla {
-  color: hsla(92, 23, 36, 1);
-}
-.Early-Soft-Summer-2-hsla {
-  color: hsla(84, 27, 54, 1);
-}
-.Early-Soft-Summer-3-hsla {
-  color: hsla(93, 37, 69, 1);
-}
-.Early-Soft-Summer-4-hsla {
-  color: hsla(22, 36, 91, 1);
-}
-.Early-Soft-Summer-5-hsla {
-  color: hsla(345, 37, 82, 1);
-}
+/* Gantt Contents ================================================= */
 </style>
