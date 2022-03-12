@@ -71,15 +71,22 @@
             </thead>
           </table>
         </div>
-        <div class="gantt-header">
-          <svg :width="days.length * 30" height="50">
-            <line x1="0" :x2="days.length * 30" y1="49.5" y2="49.5" stroke-width="1" stroke="#90AB6A" />
-            <line x1="0" :x2="days.length * 30" y1="24.5" y2="24.5" stroke-width="1" stroke="#90AB6A" />
-            <line v-for="(month, index) in this.months" :key="'month_line_' + index" :x1="month.left + month.width" :x2="month.left + month.width" y1="0" y2="24.5" stroke-width="1" stroke="#26B2A2" />
+        <div class="gantt-header" :style="{ width: (days.length * 30) + 'px' }">
+          <svg :width="(days.length * 30) + 'px'" height="25px">
+            <line x1="0px" :x2="(days.length * 30) + 'px'" y1="25px" y2="25px" stroke-width="2" stroke="#90AB6A" />
+            <line v-for="(month, index) in this.months" :key="'month_line_' + index" :x1="month.left + month.width - 0.5 " :x2="month.left + month.width - 0.5" y1="0" y2="25" stroke-width="1" stroke="#26B2A2" />
             <text class="gantt-calendar__month-text" v-for="(month, index) in this.months" :key="'month_text_' + index" :x="month.left + (month.width - 49.61) / 2" y="17.5" font-size="14">{{ month.label }}</text>
-            <line v-for="(day, index) in this.days" :key="'day_line_' + index" :x1="(index + 1) * 30" :x2="(index + 1) * 30" y1="24.5" y2="49.5" stroke-width="1" stroke="#26B2A2" />
-            <text class="gantt-calendar__day-text" v-for="(day, index) in this.days" :key="'day_text_' + index" :x="(index * 30) + (day.label < 10 ? 11.255 : 7.51)" y="43" :fill="day.color" font-size="14">{{ day.label }}</text>
           </svg>
+          <svg v-for="(day, index) in days" :key="index" width="30" :height="index > 0 ? 25 : 25.5" :style="{ left: (index * 30) + 'px', top: '25px' }">
+            <text class="gantt-calendar__day-text" :x="(day.label < 10 ? 11 : 7.255)" :y="17" :fill="day.color" font-size="14">{{ day.label }}</text>
+            <line x1="30" x2="30" y1="0" :y2="index > 0 ? 25 : 25.5" stroke-width="2" stroke="#90AB6A" />
+            <line x1="0" x2="30" :y1="index > 0 ? 25 : 24" :y2="index > 0 ? 25 : 24" :stroke-width="index > 0 ? 2 : 1" stroke="#90AB6A" />
+          </svg>
+          <!-- <svg :width="(days.length * 30) + 'px'" height="25px" :viewBox="'0 0 ' + (days.length * 30) + ' 25'" style="top: 25px;">
+            <line x1="0px" :x2="(days.length * 30) + 'px'" y1="25px" y2="25px" stroke-width="1" stroke="#90AB6A" />
+            <line v-for="(day, index) in this.days" :key="'day_line_' + index" :x1="(index + 1) * 30" :x2="(index + 1) * 30" y1="0" y2="25" stroke-width="1" stroke="#90AB6A" />
+            <text class="gantt-calendar__day-text" v-for="(day, index) in this.days" :key="'day_text_' + index" :x="(index * 30) + (day.label < 10 ? 11.255 : 7.51)" y="43" :fill="day.color" font-size="14">{{ day.label }}</text>
+          </svg> -->
         </div>
       </div>
       <div class="contents__wrap">
@@ -106,12 +113,12 @@
           </table>
         </div>
         <div class="gantt-contents">
-          <svg v-for="(task, index) in tasks" :key="'gantt_' + index" :width="days.length * 30" :height="index > 0 ? 25 : 25.5">
-            <rect v-for="(day, index) in days" :key="'day_rect_' + index" :x="(index) * 30" y="0" width="30" height="30" :fill="day.bgColor" />
-            <line x1="0" :x2="days.length * 30" :y1="index > 0 ? 24.5 : 25" :y2="index > 0 ? 24.5 : 25" :stroke-width="1" stroke="#90AB6A" />
-            <line v-for="(day, index) in days" :key="index" :x1="(index + 1) * 30" :x2="(index + 1) * 30" y1="0" y2="49.5" stroke-width="1" stroke="#90AB6A" />
-            <rect :x="index * 30" y="2" width="300" height="20" fill="#90ab6a" />
-          </svg>
+          <div class="gantt__wrap" v-for="(task, index) in tasks" :key="'gantt__wrap_' + index" :style="{ width: days.length * 30 + 'px', height: (index > 0 ? 25 : 25.5) + 'px' }">
+            <svg v-for="(day, index) in days" :key="index" width="30" :height="index > 0 ? 25 : 25.5" :style="{ left: (index * 30) + 'px' }">
+              <rect v-if="day.weekend" width="30" :height="index > 0 ? 24 : 25.5" :fill="day.bgColor" />
+              <line x1="30" x2="30" y1="0" y2="30" stroke-width="2" stroke="#90AB6A" />
+            </svg>
+          </div>
         </div>
       </div>
     </v-main>
@@ -148,6 +155,7 @@ export default {
           label: k + 1,
           value: cursor.getFullYear() + '' + (cursor.getMonth() + 1 < 10 ? '0' + (cursor.getMonth() + 1) : cursor.getMonth() + 1) + '' + ((k + 1) < 10 ? '0' + (k + 1) : (k + 1)),
           color: day.getDay() == 0 ? 'red' : day.getDay() == 6 ? 'blue' : 'black',
+          weekend: day.getDay() == 0 || day.getDay() == 6,
           bgColor: day.getDay() == 0 || day.getDay() == 6 ? '#EFEFEF' : 'transparent'
         }
       }))
@@ -161,7 +169,8 @@ export default {
 
 <style>
 html {
-  /* overflow-x: auto !important; */
+  overflow: hidden !important;
+  height: 100vh !important;
 }
 .v-app-bar {
   position: fixed !important;
@@ -270,7 +279,7 @@ html {
 .header__wrap {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 3;
   background-color: white;
   height: 50px;
   display: inline-flex;
@@ -281,6 +290,7 @@ html {
   position: sticky;
   left: 0px;
   top: 0px;
+  z-index: 2;
   display: inline-flex;
   flex-direction: row;
   background-color: #90AB6A;
@@ -302,6 +312,14 @@ html {
   text-align: left;
   padding: 5px 10px;
 }
+.header__wrap > .gantt-header {
+  position: relative;
+  background-color: white;
+}
+.header__wrap > .gantt-header > svg {
+  position: absolute;
+  display: block;
+}
 
 .contents__wrap {
   display: inline-flex;
@@ -314,6 +332,7 @@ html {
   width: 610px;
   background-color: white;
   border-right: 1px solid #90AB6A;
+  z-index: 2;
 }
 .contents__wrap > .task-contents > table {
   width: 65px;
@@ -334,8 +353,13 @@ html {
 .contents__wrap > .task-contents > table > tbody > tr > td:not(:first-child) {
   text-align: center;
 }
-.contents__wrap > .gantt-contents > svg {
+.contents__wrap > .gantt-contents > .gantt__wrap {
+  position: relative;
+  border-bottom: 1px solid #90AB6A;
+}
+.contents__wrap > .gantt-contents > .gantt__wrap > svg {
   display: block;
+  position: absolute;
 }
 
 
