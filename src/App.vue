@@ -23,7 +23,27 @@
           <v-btn depressed small disabled class="px-2" color="#5B7347">
             Delete
           </v-btn>
-          <!-- <v-divider class="mx-2" vertical></v-divider> -->
+          <v-divider class="mx-2" vertical></v-divider>
+          <v-item-group mandatory class="view-type-button-group">
+            <v-item v-slot="{ active, toggle }">
+              <v-btn depressed :color="active ? 'white' : '#90AB6A'" @click="toggle">Monthly View</v-btn>
+            </v-item>
+            <v-item v-slot="{ active, toggle }">
+              <v-btn depressed :color="active ? 'white' : '#90AB6A'" @click="toggle">Weekly View</v-btn>
+            </v-item>
+            <v-item v-slot="{ active, toggle }">
+              <v-btn depressed :color="active ? 'white' : '#90AB6A'" @click="toggle">Daily View</v-btn>
+            </v-item>
+          </v-item-group>
+          <v-divider class="mx-2" vertical></v-divider>
+          <div class="d-flex search-text-field__wrap">
+            <div class="icon__wrap">
+              <v-icon color="white">search</v-icon>
+            </div>
+            <div class="text-field__wrap">
+              <input type="text" label="search" />
+            </div>
+          </div>
         </v-toolbar-items>
       </v-toolbar>
     </v-app-bar>
@@ -50,10 +70,6 @@
               </tr>
             </thead>
           </table>
-          <!-- <div header style="width: 300px">Subject</div>
-          <div header style="width: 100px">Start Date</div>
-          <div header style="width: 100px;">Due Date</div>
-          <div header style="width: 100px;">Assigned</div> -->
         </div>
         <div class="gantt-header">
           <svg :width="days.length * 30" height="50">
@@ -112,7 +128,7 @@ export default {
   }),
   beforeMount () {
     this.tasks.push(...Array.from({ length: 50 }, (v, k) => {
-      return { subject: 'Your Task_' + k, start: '2022-03-01', end: '2022-03-07', task: '분석/설계', system: 'TCS', assigned: 'Ohmry' }
+      return { subject: 'Your Task_' + k, start: '2022-03-01', end: '2022-03-07', task: k % 2 == 0 ? 'Analysis' : 'Design', system: 'TCS', assigned: 'Ohmry' }
     }))
     let startDate = new Date(2022, 2, 0)
     let endDate = new Date(2022, 6, 0)
@@ -189,6 +205,59 @@ html {
 .v-toolbar__items > .v-divider {
   border-color: #90AB6A !important;
 }
+.v-toolbar__items > .v-divider.v-divider--vertical {
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  margin-top: 6px;
+}
+.v-toolbar__items > .search-text-field__wrap {
+  height: 28px;
+  margin: auto 0;
+  border: 0.5px solid white;
+  border-radius: 16px;
+}
+.v-toolbar__items > .search-text-field__wrap > .icon__wrap {
+  width: 27px;
+  height: 28px;
+}
+.v-toolbar__items > .search-text-field__wrap > .icon__wrap > i {
+  font-size: 18px !important;
+  height: 100%;
+  padding: 0 5px;
+  margin: auto;
+  /* margin: -1px 0px 0px 0px; */
+}
+.v-toolbar__items > .search-text-field__wrap > .text-field__wrap {
+  width: 210px;
+}
+.v-toolbar__items > .search-text-field__wrap > .text-field__wrap > input {
+  height: 24px;
+  width: 100%;
+  margin: 2px 0;
+  border: 0;
+  font-size: 0.75em;
+  color: white;
+}
+.v-toolbar__items > .search-text-field__wrap > .text-field__wrap > input:focus {
+  outline: 0;
+}
+
+
+.view-type-button-group > button {
+  background-color: transparent !important;
+  color: #90AB6A !important;
+  font-size: 0.75em !important;
+  border-radius: 0px;
+  height: 100%;
+  min-height: 100%;
+  max-height: 100%;
+}
+.view-type-button-group > button.v-item--active {
+  background-color: transparent !important;
+  color: white !important;
+}
+
 .v-main {
   margin-top: 40px !important;
 }
