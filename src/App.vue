@@ -178,7 +178,7 @@ export default {
           value: cursor.getFullYear() + '' + (cursor.getMonth() + 1 < 10 ? '0' + (cursor.getMonth() + 1) : cursor.getMonth() + 1) + '' + ((k + 1) < 10 ? '0' + (k + 1) : (k + 1)),
           color: day.getDay() == 0 ? 'red' : day.getDay() == 6 ? 'blue' : 'black',
           weekend: day.getDay() == 0 || day.getDay() == 6,
-          bgColor: day.getDay() == 0 || day.getDay() == 6 ? '#EFEFEF' : 'transparent'
+          bgColor: day.getDay() == 0 || day.getDay() == 6 ? '#F1E7E1' : 'transparent'
         }
       }))
       this.calendar.width += monthWidth
@@ -387,11 +387,16 @@ export default {
 }
 .v-main > .v-main__wrap > .gantt-container__wrap > .gantt-header__wrap > svg.gantt-calendar-month__wrap {
   height: 25px;
+  background-color: $theme-color-secondary;
+}
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-header__wrap > svg.gantt-calendar-month__wrap > text {
+  fill: white;
 }
 .v-main > .v-main__wrap > .gantt-container__wrap > .gantt-header__wrap > svg.gantt-calendar-day__wrap {
   top: 25px;
   width: 30px;
   height: 25px;
+  background-color: #F1E7E1;
 }
 /* Gantt Header ================================================= */
 /* Gantt Contents ================================================= */
@@ -412,7 +417,7 @@ export default {
 .v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg > rect.gantt-cell-bar:not(:first-child) {
   width: 30px;
   height: 20px;
-  fill: $theme-color-secondary;
+  fill: $theme-color-primary;
 }
 /* Gantt Contents ================================================= */
 </style>
