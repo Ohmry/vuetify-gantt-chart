@@ -71,8 +71,10 @@
             <tbody>
               <tr v-for="(subject, index) in subjects" :key="'subject_' + index">
                 <td>{{ subject.name }}</td>
-                <td>{{ subject.start.substring(0, 4) + '-' + subject.start.substring(4, 6) + '-' + subject.start.substring(6, 8) }}</td>
-                <td>{{ subject.end.substring(0, 4) + '-' + subject.end.substring(4, 6) + '-' + subject.end.substring(6, 8) }}</td>
+                <td></td>
+                <td></td>
+                <!-- <td>{{ subject.start.substring(0, 4) + '-' + subject.start.substring(4, 6) + '-' + subject.start.substring(6, 8) }}</td> -->
+                <!-- <td>{{ subject.end.substring(0, 4) + '-' + subject.end.substring(4, 6) + '-' + subject.end.substring(6, 8) }}</td> -->
                 <td>{{ subject.task }}</td>
                 <td>{{ subject.system }}</td>
                 <td>{{ subject.assigned }}</td>
@@ -104,7 +106,7 @@
               <line x1="0px" :x2="day.width + 'px'" y1="25px" y2="25px" />
             </svg>
             <svg class="gantt-cell-bar__wrap" :width="calendar.width + 'px'">
-              <rect class="gantt-cell-bar" y="2px" x="0px" width="100px" height="20px" />
+              <rect class="gantt-cell-bar" y="2px" :x="(subject.start.getTime() - calendar.value.start.getTime()) / (1000 * 60 * 60 * 24) + subject.between + 'px'" width="100px" height="20px" />
               <text class="gantt-cell-text" x="105px" y="15" style="font-size: 12px; color: #E3C1C9">{{ subject.name }}</text>
             </svg>
           </div>
@@ -159,20 +161,28 @@ export default {
       let year = cursor.getFullYear()
       let month = cursor.getMonth() + 1
       this.calendar.months.push({
-        left: this.calendar.width + 'px',
+        left: this.calendar.width,
         width: monthlyWidth,
         year: year,
         month: month,
-        label: year + '' + (month < 10 ? '0' + month : month)
+        label: year + '-' + (month < 10 ? '0' + month : month)
       })
+      this.calendar.days.push(...Array.from({ length: cursor.getDate() }, (v, k) => {
+        let day = new Date(year, cursor.getMonth(), k + 1)
+        return {
+          label: k + 1,
+          width: this.$store.state.cell.width,
+          value: year + '' + (month < 10 ? '0' + month : month) + '' + (k < 10 ? '0' + k : k),
+          color: day.getDay() == 0 ? 'red' : day.getDay() == 6 ? 'blue' : 'black',
+          weekend: day.getDay() == 0 || day.getDay() == 6,
+          bgColor: day.getDay() == 0 || day.getDay() == 6 ? '#F1E7E1' : 'transparent'
+        }
+      }))
+      this.calendar.width += monthlyWidth
       cursor.setMonth(cursor.getMonth() + 2)
       cursor.setDate(0)
     }
-    console.log(this.calendar.value);
 
-    let startDate = new Date(2022, 2, 0)
-    let endDate = new Date(2022, 6, 0)
-    
     this.subjects.push(...Array.from({ length: 40 }, (v, k) => {
       let year = 2022
       let month = Math.round(Math.random() * 10 % 5 + 1)
@@ -181,46 +191,21 @@ export default {
       let endDay = startDay + Math.round(Math.random() * 10)
       let start = new Date(year, month, startDay)
       let end = new Date(year, month, endDay)
-      let startValue = start.getFullYear() + '' + ((start.getMonth() + 1) < 10 ? '0' + (start.getMonth() + 1) : (start.getMonth() + 1)) + '' + (start.getDate() < 10 ? '0' + start.getDate() : start.getDate())
-      let endValue = end.getFullYear() + '' + ((end.getMonth() + 1) < 10 ? '0' + (end.getMonth() + 1) : (end.getMonth() + 1)) + '' + (end.getDate() < 10 ? '0' + end.getDate() : end.getDate())
+      // let startValue = start.getFullYear() + '' + ((start.getMonth() + 1) < 10 ? '0' + (start.getMonth() + 1) : (start.getMonth() + 1)) + '' + (start.getDate() < 10 ? '0' + start.getDate() : start.getDate())
+      // let endValue = end.getFullYear() + '' + ((end.getMonth() + 1) < 10 ? '0' + (end.getMonth() + 1) : (end.getMonth() + 1)) + '' + (end.getDate() < 10 ? '0' + end.getDate() : end.getDate())
       
-      // console.log(startDate, startValue, (start.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
       let task = ['Analysis', 'Design', 'Develop', 'Test', 'Deploy']
 
       return {
         name: 'Subject Example (' + k + ')',
-        start: startValue,
-        end: endValue,
+        start: start,
+        end: end,
+        between: (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
         task: task[Math.round(Math.random() * 5)],
         system: 'TCS',
         assigned: 'Ohmry'
       }
     }))
-    
-    for (let cursor = startDate; cursor <= endDate;) {
-      let monthWidth = this.$store.state.cell.width * cursor.getDate()
-      this.calendar.months.push({
-        left: this.calendar.width,
-        width: monthWidth,
-        year: cursor.getFullYear(),
-        month: cursor.getMonth() + 1,
-        label: cursor.getFullYear() + '-' + ((cursor.getMonth() + 1) < 10 ? '0' + (cursor.getMonth() + 1) : (cursor.getMonth() + 1))
-      })
-      this.calendar.days.push(...Array.from({ length: cursor.getDate() }, (v, k) => {
-        let day = new Date(cursor.getFullYear(), cursor.getMonth(), k + 1)
-        return {
-          label: k + 1,
-          width: this.$store.state.cell.width,
-          value: cursor.getFullYear() + '' + (cursor.getMonth() + 1 < 10 ? '0' + (cursor.getMonth() + 1) : cursor.getMonth() + 1) + '' + ((k + 1) < 10 ? '0' + (k + 1) : (k + 1)),
-          color: day.getDay() == 0 ? 'red' : day.getDay() == 6 ? 'blue' : 'black',
-          weekend: day.getDay() == 0 || day.getDay() == 6,
-          bgColor: day.getDay() == 0 || day.getDay() == 6 ? '#F1E7E1' : 'transparent'
-        }
-      }))
-      this.calendar.width += monthWidth
-      cursor.setMonth(cursor.getMonth() + 2)
-      cursor.setDate(0)
-    }
   }
 }
 </script>
