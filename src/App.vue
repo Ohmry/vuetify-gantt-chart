@@ -23,11 +23,13 @@
               </v-item>
             </v-item-group>
             <v-divider vertical></v-divider>
+            <v-btn depressed small class="px-2">Go to Today</v-btn>
+            <v-btn depressed small class="px-2">Search</v-btn>
             <!-- Search -->
-            <div class="d-flex v-gantt-search-field">
+            <!-- <div class="d-flex v-gantt-search-field">
               <v-icon @click="system.menu.search.visible = !system.menu.search.visible">search</v-icon>
               <input type="text" label="search" placeholder="Enter keyword you want to find" :style="{ width: system.menu.search.visible ? '' : '0px', marginLeft: system.menu.search.visible ? '' : '-14px' }"/>
-            </div>
+            </div> -->
           </v-toolbar-items>
         </v-toolbar>
     </v-app-bar>
@@ -95,12 +97,16 @@
         </div>
         <div class="gantt-contents__wrap">
           <div class="gantt-cell__wrap" v-for="(subject, index) in subjects" :key="'gantt-cell_' + index">
-            <svg v-for="(day, index) in calendar.days" :key="'gantt-cell_day_' + index" :style="{ left: (index * 30) + 'px' }">
+            <svg class="gantt-cell-grid__wrap" v-for="(day, index) in calendar.days" :key="'gantt-cell_day_' + index" :style="{ left: (index * 30) + 'px' }">
               <rect v-if="day.weekend" width="30" height="25px" :fill="day.bgColor" />
               <line x1="30px" x2="30px" y1="0px" y2="25px" />
-              <rect class="gantt-cell-bar" v-if="day.value >= subject.start && day.value <= subject.end" y="2px" :x="(day.value == subject.start ? 2 : 0) + 'px'" />
+              <!-- <rect class="gantt-cell-bar" v-if="day.value >= subject.start && day.value <= subject.end" y="2px" :x="(day.value == subject.start ? 2 : 0) + 'px'" /> -->
               <line x1="0px" x2="30px" y1="25px" y2="25px" />
             </svg>
+            <!-- <svg class="gantt-cell-bar__wrap" :width="calendar.width + 'px'">
+              <rect class="gantt-cell-bar" y="2px" x="0px" width="100px" height="20px" />
+              <text class="gantt-cell-text" x="10px" y="15" style="font-size: 12px; color: #E3C1C9">{{ subject.name }}</text>
+            </svg> -->
           </div>
         </div>
       </div>
@@ -407,17 +413,17 @@ export default {
 .v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg {
   position: absolute;
   display: block;
-  width: 30px;
   height: 25px;
+}
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg.gantt-cell-grid__wrap {
+  width: 30px;
+}
+.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg.gantt-cell-bar__wrap > rect {
+  fill: $theme-color-secondary;
 }
 .v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg > line {
   stroke-width: 1;
   stroke: $theme-color-primary;
-}
-.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg > rect.gantt-cell-bar:not(:first-child) {
-  width: 30px;
-  height: 20px;
-  fill: $theme-color-primary;
 }
 /* Gantt Contents ================================================= */
 </style>

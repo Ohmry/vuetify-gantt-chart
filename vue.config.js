@@ -1,6 +1,6 @@
 module.exports = {
   outputDir: './docs',
-  publicPath: '/vuetify-gantt-chart',
+  publicPath: process.env.NODE__ENV === 'production' ? '/vuetify-gantt-chart' : '',
   transpileDependencies: [
     'vuetify'
   ]
