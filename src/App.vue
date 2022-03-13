@@ -85,28 +85,28 @@
       <div class="gantt-container__wrap">
         <div class="gantt-header__wrap" :style="{ width: calendar.width + 'px' }">
           <svg class="gantt-calendar-month__wrap" v-for="(month, index) in calendar.months" :key="'gantt-calendar-month_' + index" :style="{ width: month.width + 'px', left: month.left + 'px' }" >
-            <text :x="(month.width - 49.61) / 2" y="17.5" font-size="14">{{ month.label }}</text>
-            <line x1="0px" :x2="month.width" y1="25px" y2="25px" />
-            <line :x1="month.width" :x2="month.width" y1="0px" y2="25px" />
+            <text :x="(month.width - 49.61) / 2" y="17.5" font-size="12">{{ month.label }}</text>
+            <line x1="0px" :x2="month.width + 'px'" y1="25px" y2="25px" />
+            <line :x1="month.width + 'px'" :x2="month.width + 'px'" y1="0px" y2="25px" />
           </svg>
-          <svg class="gantt-calendar-day__wrap" v-for="(day, index) in calendar.days" :key="'gantt-calendar-day_' + index" :style="{ left: (index * 30) + 'px'  }">
-            <text :x="(day.label < 10 ? 11 : 7.255) + 'px'" y="17px" :fill="day.color" font-size="14">{{ day.label }}</text>
-            <line x1="0px" x2="30px" y1="25px" y2="25px" />
-            <line x1="30px" x2="30px" y1="0px" y2="25px" />
+          <svg class="gantt-calendar-day__wrap" v-for="(day, index) in calendar.days" :key="'gantt-calendar-day_' + index" :style="{ left: (index * day.width) + 'px'  }">
+            <text :x="(day.label < 10 ? 4 : 1.79) + 'px'" y="17px" :fill="day.color" font-size="12">{{ day.label }}</text>
+            <line x1="0px" :x2="day.width + 'px'" y1="25px" y2="25px" />
+            <line x1="18px" :x2="day.width + 'px'" y1="0px" y2="25px" />
           </svg>
         </div>
         <div class="gantt-contents__wrap">
           <div class="gantt-cell__wrap" v-for="(subject, index) in subjects" :key="'gantt-cell_' + index">
-            <svg class="gantt-cell-grid__wrap" v-for="(day, index) in calendar.days" :key="'gantt-cell_day_' + index" :style="{ left: (index * 30) + 'px' }">
-              <rect v-if="day.weekend" width="30" height="25px" :fill="day.bgColor" />
-              <line x1="30px" x2="30px" y1="0px" y2="25px" />
+            <svg class="gantt-cell-grid__wrap" v-for="(day, index) in calendar.days" :key="'gantt-cell_day_' + index" :style="{ left: (index * day.width) + 'px', width: day.width + 'px' }">
+              <rect v-if="day.weekend" :width="day.width + 'px'" height="25px" :fill="day.bgColor" />
+              <line :x1="day.width + 'px'" :x2="day.width + 'px'" y1="0px" y2="25px" />
               <!-- <rect class="gantt-cell-bar" v-if="day.value >= subject.start && day.value <= subject.end" y="2px" :x="(day.value == subject.start ? 2 : 0) + 'px'" /> -->
-              <line x1="0px" x2="30px" y1="25px" y2="25px" />
+              <line x1="0px" :x2="day.width + 'px'" y1="25px" y2="25px" />
             </svg>
-            <!-- <svg class="gantt-cell-bar__wrap" :width="calendar.width + 'px'">
+            <svg class="gantt-cell-bar__wrap" :width="calendar.width + 'px'">
               <rect class="gantt-cell-bar" y="2px" x="0px" width="100px" height="20px" />
-              <text class="gantt-cell-text" x="10px" y="15" style="font-size: 12px; color: #E3C1C9">{{ subject.name }}</text>
-            </svg> -->
+              <text class="gantt-cell-text" x="105px" y="15" style="font-size: 12px; color: #E3C1C9">{{ subject.name }}</text>
+            </svg>
           </div>
         </div>
       </div>
@@ -137,11 +137,42 @@ export default {
     calendar: {
       width: 0,
       months: [],
-      days: []
+      days: [],
+      value: {
+        start: undefined,
+        end: undefined
+      }
     },
     subjects: []
   }),
   beforeMount () {
+    const calendarFrom = '202202'
+    const calendarTo = '202206'
+    const dateFrom = new Date(calendarFrom.substring(0, 4), calendarFrom.substring(4, 6), 0)
+    const dateTo = new Date(calendarTo.substring(0, 4), calendarTo.substring(4, 6), 0)
+
+    this.calendar.value.start = new Date(calendarFrom.substring(0, 4), calendarFrom.substring(4, 6) - 1, 1)
+    this.calendar.value.end = dateTo
+
+    for (let cursor = dateFrom; cursor <= dateTo;) {
+      let monthlyWidth = this.$store.state.cell.width * cursor.getDate()
+      let year = cursor.getFullYear()
+      let month = cursor.getMonth() + 1
+      this.calendar.months.push({
+        left: this.calendar.width + 'px',
+        width: monthlyWidth,
+        year: year,
+        month: month,
+        label: year + '' + (month < 10 ? '0' + month : month)
+      })
+      cursor.setMonth(cursor.getMonth() + 2)
+      cursor.setDate(0)
+    }
+    console.log(this.calendar.value);
+
+    let startDate = new Date(2022, 2, 0)
+    let endDate = new Date(2022, 6, 0)
+    
     this.subjects.push(...Array.from({ length: 40 }, (v, k) => {
       let year = 2022
       let month = Math.round(Math.random() * 10 % 5 + 1)
@@ -153,6 +184,7 @@ export default {
       let startValue = start.getFullYear() + '' + ((start.getMonth() + 1) < 10 ? '0' + (start.getMonth() + 1) : (start.getMonth() + 1)) + '' + (start.getDate() < 10 ? '0' + start.getDate() : start.getDate())
       let endValue = end.getFullYear() + '' + ((end.getMonth() + 1) < 10 ? '0' + (end.getMonth() + 1) : (end.getMonth() + 1)) + '' + (end.getDate() < 10 ? '0' + end.getDate() : end.getDate())
       
+      // console.log(startDate, startValue, (start.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
       let task = ['Analysis', 'Design', 'Develop', 'Test', 'Deploy']
 
       return {
@@ -164,9 +196,6 @@ export default {
         assigned: 'Ohmry'
       }
     }))
-    
-    let startDate = new Date(2022, 2, 0)
-    let endDate = new Date(2022, 6, 0)
     
     for (let cursor = startDate; cursor <= endDate;) {
       let monthWidth = this.$store.state.cell.width * cursor.getDate()
@@ -181,6 +210,7 @@ export default {
         let day = new Date(cursor.getFullYear(), cursor.getMonth(), k + 1)
         return {
           label: k + 1,
+          width: this.$store.state.cell.width,
           value: cursor.getFullYear() + '' + (cursor.getMonth() + 1 < 10 ? '0' + (cursor.getMonth() + 1) : cursor.getMonth() + 1) + '' + ((k + 1) < 10 ? '0' + (k + 1) : (k + 1)),
           color: day.getDay() == 0 ? 'red' : day.getDay() == 6 ? 'blue' : 'black',
           weekend: day.getDay() == 0 || day.getDay() == 6,
@@ -400,7 +430,7 @@ export default {
 }
 .v-main > .v-main__wrap > .gantt-container__wrap > .gantt-header__wrap > svg.gantt-calendar-day__wrap {
   top: 25px;
-  width: 30px;
+  width: 18px;
   height: 25px;
   background-color: #F1E7E1;
 }
@@ -414,9 +444,6 @@ export default {
   position: absolute;
   display: block;
   height: 25px;
-}
-.v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg.gantt-cell-grid__wrap {
-  width: 30px;
 }
 .v-main > .v-main__wrap > .gantt-container__wrap > .gantt-contents__wrap > .gantt-cell__wrap > svg.gantt-cell-bar__wrap > rect {
   fill: $theme-color-secondary;
