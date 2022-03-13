@@ -71,10 +71,8 @@
             <tbody>
               <tr v-for="(subject, index) in subjects" :key="'subject_' + index">
                 <td>{{ subject.name }}</td>
-                <td></td>
-                <td></td>
-                <!-- <td>{{ subject.start.substring(0, 4) + '-' + subject.start.substring(4, 6) + '-' + subject.start.substring(6, 8) }}</td> -->
-                <!-- <td>{{ subject.end.substring(0, 4) + '-' + subject.end.substring(4, 6) + '-' + subject.end.substring(6, 8) }}</td> -->
+                <td>{{ subject.startLabel }}</td>
+                <td>{{ subject.endLabel }}</td>
                 <td>{{ subject.task }}</td>
                 <td>{{ subject.system }}</td>
                 <td>{{ subject.assigned }}</td>
@@ -106,8 +104,8 @@
               <line x1="0px" :x2="day.width + 'px'" y1="25px" y2="25px" />
             </svg>
             <svg class="gantt-cell-bar__wrap" :width="calendar.width + 'px'">
-              <rect class="gantt-cell-bar" y="2px" :x="(subject.start.getTime() - calendar.value.start.getTime()) / (1000 * 60 * 60 * 24) + subject.between + 'px'" width="100px" height="20px" />
-              <text class="gantt-cell-text" x="105px" y="15" style="font-size: 12px; color: #E3C1C9">{{ subject.name }}</text>
+              <rect class="gantt-cell-bar" y="2px" :x="subject.left * 18 + 'px'" :width="(subject.between + 1) * 18 + 'px'" height="20px" />
+              <text class="gantt-cell-text" :x="((subject.left * 18) + (subject.between + 1) * 18) + 2 + 'px'" y="16" style="font-size: 12px; color: #E3C1C9">{{ subject.name }}</text>
             </svg>
           </div>
         </div>
@@ -191,19 +189,28 @@ export default {
       let endDay = startDay + Math.round(Math.random() * 10)
       let start = new Date(year, month, startDay)
       let end = new Date(year, month, endDay)
-      // let startValue = start.getFullYear() + '' + ((start.getMonth() + 1) < 10 ? '0' + (start.getMonth() + 1) : (start.getMonth() + 1)) + '' + (start.getDate() < 10 ? '0' + start.getDate() : start.getDate())
-      // let endValue = end.getFullYear() + '' + ((end.getMonth() + 1) < 10 ? '0' + (end.getMonth() + 1) : (end.getMonth() + 1)) + '' + (end.getDate() < 10 ? '0' + end.getDate() : end.getDate())
+      let startLabel = start.getFullYear() + '-' + ((start.getMonth() + 1) < 10 ? '0' + (start.getMonth() + 1) : (start.getMonth() + 1)) + '-' + (start.getDate() < 10 ? '0' + start.getDate() : start.getDate())
+      let endLabel = end.getFullYear() + '-' + ((end.getMonth() + 1) < 10 ? '0' + (end.getMonth() + 1) : (end.getMonth() + 1)) + '-' + (end.getDate() < 10 ? '0' + end.getDate() : end.getDate())
       
       let task = ['Analysis', 'Design', 'Develop', 'Test', 'Deploy']
 
       return {
         name: 'Subject Example (' + k + ')',
-        start: start,
-        end: end,
-        between: (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
-        task: task[Math.round(Math.random() * 5)],
+        task: task[Math.round(Math.random() * 4)],
         system: 'TCS',
-        assigned: 'Ohmry'
+        assigned: 'Ohmry',
+        start: {
+          label: startLabel,
+          value: start
+        },
+        end: {
+          label: endLabel,
+          value: end
+        },
+        left: (start.getTime() - this.calendar.value.start.getTime()) / (1000 * 60 * 60 * 24),
+        between: (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+        startLabel: startLabel,
+        endLabel: endLabel
       }
     }))
   }
