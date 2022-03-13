@@ -61,7 +61,8 @@
         <div class="task-contents__wrap">
           <table>
             <colgroup>
-              <col style="width: 200px" />
+              <col style="width: 50px" />
+              <col style="width: 150px" />
               <col style="width: 80px" />
               <col style="width: 80px" />
               <col style="width: 100px" />
@@ -70,7 +71,8 @@
             </colgroup>
             <tbody>
               <tr v-for="(subject, index) in subjects" :key="'subject_' + index">
-                <td>{{ subject.name }}</td>
+                <td class="subject-cell-icon"><v-icon>folder</v-icon></td>
+                <td class="subject-cell-name">{{ subject.name }}</td>
                 <td>{{ subject.startLabel }}</td>
                 <td>{{ subject.endLabel }}</td>
                 <td>{{ subject.task }}</td>
@@ -388,11 +390,14 @@ export default {
   font-size: 12px;
   padding: 3px 5px;
 }
-.v-main > .v-main__wrap > .task-container__wrap > .task-contents__wrap > table > tbody > tr > td:first-child {
-  padding: 3px 10px;
-}
 .v-main > .v-main__wrap > .task-container__wrap > .task-contents__wrap > table > tbody > tr > td:not(:first-child) {
   text-align: center;
+}
+.v-main > .v-main__wrap > .task-container__wrap > .task-contents__wrap > table > tbody > tr > td.subject-cell-icon {
+  padding: 3px 10px;
+}
+.v-main > .v-main__wrap > .task-container__wrap > .task-contents__wrap > table > tbody > tr > td.subject-cell-name {
+  text-align: left;
 }
 /* Task Contents ================================================= */
 /* Gantt Header ================================================= */
